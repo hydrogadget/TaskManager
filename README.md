@@ -1,4 +1,4 @@
 TaskManager
 ===========
 
-TaskManager
+HydroGadget Event Queue Manager
