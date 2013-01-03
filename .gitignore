@@ -3,6 +3,9 @@
 # C extensions
 *.so
 
+# Editors
+.swp
+
 # Packages
 *.egg
 *.egg-info

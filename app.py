@@ -16,18 +16,18 @@ LOG_FILE_LOCATION="/tmp/hydrogadget.log"
 app = Flask(__name__)
 app.config.from_object(__name__)
 
-TASK_QUEUE = deque()
-PRIORITY_TASK_QUEUE = deque()
-CURRENTLY_RUNNING_QUEUE = []
+EVENT_QUEUE = deque()
+PRIORITY_EVENT_QUEUE = deque()
+CURRENT_EVENT = [0]
 
-task_queue_log = logging.FileHandler(LOG_FILE_LOCATION)
-task_queue_log.setFormatter(logging.Formatter(
+event_queue_log = logging.FileHandler(LOG_FILE_LOCATION)
+event_queue_log.setFormatter(logging.Formatter(
     '%(asctime)s %(levelname)s: %(message)s '
     '[in %(pathname)s:%(lineno)d]'
 ))
 
-task_queue_log.setLevel(logging.INFO)
-app.logger.addHandler(task_queue_log)
+event_queue_log.setLevel(logging.INFO)
+app.logger.addHandler(event_queue_log)
 
 def connect_db():
     return sqlite3.connect(app.config['DATABASE'])
@@ -57,8 +57,8 @@ def check_for_new_events():
     db.close()
     
     if len(timer_event) > 0:
-        app.logger.info("adding event")
-        TASK_QUEUE.append(json.dumps(timer_event[0]))
+        app.logger.info("adding event " + repr(timer_event[0]))
+        EVENT_QUEUE.append(timer_event[0])
 
 sched.start()
 
@@ -75,20 +75,27 @@ def teardown_request(exception):
 @app.route('/next/event', methods=['GET'])
 def next_event():
 
-    if len(TASK_QUEUE) > 0:
-        js = json.dumps(TASK_QUEUE.popleft())
+    if len(EVENT_QUEUE) > 0:
+        js = json.dumps(EVENT_QUEUE.popleft())
     else:
         js = json.dumps({'valve':0,'duration':0,'start_time':0})
 
+    CURRENT_EVENT[0] = js
     return Response(js, status=200, mimetype='application/json')
 
 @app.route('/list/queue', methods=['GET'])
 def list_queue():
     j = []
-    for x in TASK_QUEUE:
+    for x in EVENT_QUEUE:
         j.append(x)
 
-    return json.dumps(j,sort_keys=True, indent=2)
+    js = json.dumps(j,sort_keys=True, indent=2)
+    return Response(js, status=200, mimetype='application/json')
+
+@app.route('/current/event', methods=['GET'])
+def current_event():
+    print CURRENT_EVENT
+    return Response(CURRENT_EVENT, status=200, mimetype='application/json')
 
 if __name__ == '__main__':
     app.run()
