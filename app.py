@@ -70,9 +70,17 @@ def before_request():
 def teardown_request(exception):
     g.db.close()
 
-@app.route('/next/event',methods=['GET'])
+# pt-bare@zappos.com / Goldbull13
+
+@app.route('/next/event', methods=['GET'])
 def next_event():
-    pass
+
+    if len(TASK_QUEUE) > 0:
+        js = json.dumps(TASK_QUEUE.popleft())
+    else:
+        js = json.dumps({'valve':0,'duration':0,'start_time':0})
+
+    return Response(js, status=200, mimetype='application/json')
 
 @app.route('/list/queue', methods=['GET'])
 def list_queue():
