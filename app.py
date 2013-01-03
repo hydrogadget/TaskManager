@@ -12,13 +12,13 @@ SECRET_KEY = 'the key'
 # PASSWORD = 'default'
 CHECK_FOR_NEW_EVENTS_INTERVAL = 60
 LOG_FILE_LOCATION="/tmp/hydrogadget.log"
-NULL_EVENT = {'valve':0,'duration':0,'start_time':0}
+NULL_EVENT = {'valve':0,'duration':0,'start_time':0,'command':0}
 
 app = Flask(__name__)
 app.config.from_object(__name__)
 
 EVENT_QUEUE = deque()
-PRIORITY_EVENT_QUEUE = deque()
+PRIORITY_EVENT = [NULL_EVENT,]
 CURRENT_EVENT = [NULL_EVENT,]
 
 event_queue_log = logging.FileHandler(LOG_FILE_LOCATION)
@@ -71,6 +71,16 @@ def before_request():
 def teardown_request(exception):
     g.db.close()
 
+@app.route('/list/queue', methods=['GET'])
+def list_queue():
+
+    j = []
+    for x in EVENT_QUEUE:
+        j.append(x)
+
+    js = json.dumps(j,sort_keys=True, indent=2)
+    return Response(js, status=200, mimetype='application/json')
+
 @app.route('/next/event', methods=['GET'])
 def next_event():
 
@@ -82,19 +92,25 @@ def next_event():
     CURRENT_EVENT[0] = js
     return Response(js, status=200, mimetype='application/json')
 
-@app.route('/list/queue', methods=['GET'])
-def list_queue():
-
-    j = []
-    for x in EVENT_QUEUE:
-        j.append(x)
-
-    js = json.dumps(j,sort_keys=True, indent=2)
-    return Response(js, status=200, mimetype='application/json')
-
 @app.route('/current/event', methods=['GET'])
 def current_event():
     return Response(CURRENT_EVENT, status=200, mimetype='application/json')
+
+@app.route('/add/priority', methods=['POST'])
+def add_priority():
+
+    event = {'valve': request.form['valve'],
+             'command': request.form['command'],
+             'duration': request.form['duration'],
+             'start_time': request.form['start_time']
+             }
+
+    PRIORITY_EVENT[0] = event
+    return Response(PRIORITY_EVENT, status=200, mimetype='application/json')
+
+@app.route('/check/priority', methods=['GET'])
+def check_priority():
+    return Response(PRIORITY_EVENT, status=200, mimetype='application/json')
 
 if __name__ == '__main__':
     app.run()
