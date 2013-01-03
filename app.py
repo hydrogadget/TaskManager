@@ -12,13 +12,14 @@ SECRET_KEY = 'the key'
 # PASSWORD = 'default'
 CHECK_FOR_NEW_EVENTS_INTERVAL = 60
 LOG_FILE_LOCATION="/tmp/hydrogadget.log"
+NULL_EVENT = {'valve':0,'duration':0,'start_time':0}
 
 app = Flask(__name__)
 app.config.from_object(__name__)
 
 EVENT_QUEUE = deque()
 PRIORITY_EVENT_QUEUE = deque()
-CURRENT_EVENT = [0]
+CURRENT_EVENT = [NULL_EVENT,]
 
 event_queue_log = logging.FileHandler(LOG_FILE_LOCATION)
 event_queue_log.setFormatter(logging.Formatter(
@@ -70,21 +71,20 @@ def before_request():
 def teardown_request(exception):
     g.db.close()
 
-# pt-bare@zappos.com / Goldbull13
-
 @app.route('/next/event', methods=['GET'])
 def next_event():
 
     if len(EVENT_QUEUE) > 0:
         js = json.dumps(EVENT_QUEUE.popleft())
     else:
-        js = json.dumps({'valve':0,'duration':0,'start_time':0})
+        js = json.dumps(NULL_EVENT)
 
     CURRENT_EVENT[0] = js
     return Response(js, status=200, mimetype='application/json')
 
 @app.route('/list/queue', methods=['GET'])
 def list_queue():
+
     j = []
     for x in EVENT_QUEUE:
         j.append(x)
@@ -94,7 +94,6 @@ def list_queue():
 
 @app.route('/current/event', methods=['GET'])
 def current_event():
-    print CURRENT_EVENT
     return Response(CURRENT_EVENT, status=200, mimetype='application/json')
 
 if __name__ == '__main__':
