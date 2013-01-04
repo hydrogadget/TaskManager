@@ -7,9 +7,11 @@ from flask import Flask, request, session, g, Response, jsonify
 
 DATABASE = '/tmp/hydrogadget.db'
 DEBUG = True
+
 SECRET_KEY = 'the key'
 # USERNAME = 'admin'
 # PASSWORD = 'default'
+
 CHECK_FOR_NEW_EVENTS_INTERVAL = 60
 LOG_FILE_LOCATION="/tmp/hydrogadget.log"
 NULL_EVENT = {'valve':0,'duration':0,'start_time':0,'command':0}
@@ -28,7 +30,7 @@ event_queue_log.setFormatter(logging.Formatter(
 ))
 
 event_queue_log.setLevel(logging.INFO)
-app.logger.addHandler(event_queue_log)
+# app.logger.addHandler(event_queue_log)
 
 def connect_db():
     return sqlite3.connect(app.config['DATABASE'])
@@ -39,7 +41,7 @@ def init_db():
             db.cursor().executescript(f.read())
         db.commit()
 
-logging.basicConfig()
+# logging.basicConfig()
 sched = Scheduler()
 
 @sched.interval_schedule(seconds=CHECK_FOR_NEW_EVENTS_INTERVAL)
@@ -54,7 +56,7 @@ def check_for_new_events():
             AND tue = ? AND wed = ? AND thu = ? AND fri = ? AND sat = ? \
             AND sun = ? AND start_time = ?', select_list)
 
-    timer_event = [dict(valve=row[0], duration=row[1], start_time=row[2]) for row in cur.fetchall()]
+    timer_event = [dict(valve=row[0], duration=row[1], start_time=row[2], command=0) for row in cur.fetchall()]
     db.close()
     
     if len(timer_event) > 0:
@@ -71,7 +73,7 @@ def before_request():
 def teardown_request(exception):
     g.db.close()
 
-@app.route('/list/queue', methods=['GET'])
+@app.route('/list/events', methods=['GET'])
 def list_queue():
 
     j = []
@@ -81,7 +83,7 @@ def list_queue():
     js = json.dumps(j,sort_keys=True, indent=2)
     return Response(js, status=200, mimetype='application/json')
 
-@app.route('/next/event', methods=['GET'])
+@app.route('/next/event', methods=['POST'])
 def next_event():
 
     if len(EVENT_QUEUE) > 0:
@@ -94,23 +96,33 @@ def next_event():
 
 @app.route('/current/event', methods=['GET'])
 def current_event():
+
     return Response(CURRENT_EVENT, status=200, mimetype='application/json')
+
+@app.route('/list/priority', methods=['GET'])
+def check_priority():
+
+    return Response(json.dumps(PRIORITY_EVENT), status=200, mimetype='application/json')
 
 @app.route('/add/priority', methods=['POST'])
 def add_priority():
 
-    event = {'valve': request.form['valve'],
-             'command': request.form['command'],
-             'duration': request.form['duration'],
-             'start_time': request.form['start_time']
+    event = {'valve': int(request.form['valve']),
+             'command': int(request.form['command']),
+             'duration': int(request.form['duration']),
+             'start_time': int(request.form['start_time'])
              }
 
     PRIORITY_EVENT[0] = event
-    return Response(PRIORITY_EVENT, status=200, mimetype='application/json')
+    return Response(json.dumps(PRIORITY_EVENT), status=200, mimetype='application/json')
 
-@app.route('/check/priority', methods=['GET'])
-def check_priority():
-    return Response(PRIORITY_EVENT, status=200, mimetype='application/json')
+@app.route('/next/priority', methods=['POST'])
+def next_priority():
+
+    js = json.dumps(PRIORITY_EVENT)
+    PRIORITY_EVENT = NULL_EVENT
+
+    return Response(js, status=200, mimetype='application/json')
 
 if __name__ == '__main__':
     app.run()
