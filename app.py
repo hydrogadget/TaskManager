@@ -123,7 +123,11 @@ def add_priority():
 @app.route('/next/priority', methods=['POST'])
 def next_priority():
 
-    js = json.dumps(PRIORITY_QUEUE.popleft())
+    if len(PRIORITY_QUEUE) > 0:
+        js = json.dumps(PRIORITY_QUEUE.popleft())
+    else:
+        js = json.dumps(NULL_EVENT)
+
     return Response(js, status=200, mimetype='application/json')
 
 if __name__ == '__main__':
