@@ -3,6 +3,8 @@ from contextlib import closing
 from apscheduler.scheduler import Scheduler
 from collections import deque
 
+from logging.handlers import RotatingFileHandler
+
 from flask import Flask, request, session, g, Response, jsonify
 
 DATABASE = '/tmp/hydrogadget.db'
@@ -14,23 +16,18 @@ SECRET_KEY = 'the key'
 
 CHECK_FOR_NEW_EVENTS_INTERVAL = 60
 LOG_FILE_LOCATION="/tmp/hydrogadget.log"
-NULL_EVENT = {'valve':0,'duration':0,'start_time':0,'command':0}
-
-app = Flask(__name__)
-app.config.from_object(__name__)
+NULL_EVENT = {"valve":None,"duration":None,"start_time":None,"command":None}
 
 EVENT_QUEUE = deque()
 PRIORITY_EVENT = [NULL_EVENT,]
 CURRENT_EVENT = [NULL_EVENT,]
 
-event_queue_log = logging.FileHandler(LOG_FILE_LOCATION)
-event_queue_log.setFormatter(logging.Formatter(
-    '%(asctime)s %(levelname)s: %(message)s '
-    '[in %(pathname)s:%(lineno)d]'
-))
+app = Flask(__name__)
+app.config.from_object(__name__)
 
-event_queue_log.setLevel(logging.INFO)
-# app.logger.addHandler(event_queue_log)
+file_handler = RotatingFileHandler('/tmp/hydrogadget.log')
+file_handler.setLevel(logging.INFO)
+app.logger.addHandler(file_handler)
 
 def connect_db():
     return sqlite3.connect(app.config['DATABASE'])
@@ -123,6 +120,10 @@ def next_priority():
     PRIORITY_EVENT = NULL_EVENT
 
     return Response(js, status=200, mimetype='application/json')
+
+@app.route('/', methods=['GET','POST'])
+def index():
+    return Response(json.dumps(NULL_EVENT), status=200, mimetype='application/json')
 
 if __name__ == '__main__':
     app.run()
