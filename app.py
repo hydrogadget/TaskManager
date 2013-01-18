@@ -4,6 +4,7 @@ from apscheduler.scheduler import Scheduler
 from collections import deque
 
 from logging.handlers import RotatingFileHandler
+from logging import Formatter
 
 from flask import Flask, request, session, g, Response, jsonify
 
@@ -26,6 +27,12 @@ app = Flask(__name__)
 app.config.from_object(__name__)
 
 file_handler = RotatingFileHandler('/tmp/hydrogadget.log')
+
+file_handler.setFormatter(Formatter(
+    '%(asctime)s %(levelname)s: %(message)s '
+    '[in %(pathname)s:%(lineno)d]'
+))
+
 file_handler.setLevel(logging.INFO)
 app.logger.addHandler(file_handler)
 
