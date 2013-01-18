@@ -20,7 +20,7 @@ LOG_FILE_LOCATION="/tmp/hydrogadget.log"
 NULL_EVENT = {"valve":None,"duration":None,"start_time":None,"command":None}
 
 EVENT_QUEUE = deque()
-PRIORITY_EVENT = [NULL_EVENT,]
+PRIORITY_QUEUE = deque()
 CURRENT_EVENT = [NULL_EVENT,]
 
 app = Flask(__name__)
@@ -104,9 +104,13 @@ def current_event():
     return Response(CURRENT_EVENT, status=200, mimetype='application/json')
 
 @app.route('/list/priority', methods=['GET'])
-def check_priority():
+def list_priority():
 
-    return Response(json.dumps(PRIORITY_EVENT), status=200, mimetype='application/json')
+    j = []
+    for x in PRIORITY_QUEUE:
+        j.append(x)
+
+    return Response(json.dumps(j, sort_keys=True, indent=2), status=200, mimetype='application/json')
 
 @app.route('/add/priority', methods=['POST'])
 def add_priority():
@@ -117,14 +121,16 @@ def add_priority():
              'start_time': int(request.form['start_time'])
              }
 
-    PRIORITY_EVENT[0] = event
-    return Response(json.dumps(PRIORITY_EVENT), status=200, mimetype='application/json')
+    PRIORITY_QUEUE.append(event)
+    return Response(json.dumps(PRIORITY_QUEUE[0]), status=200, mimetype='application/json')
 
 @app.route('/next/priority', methods=['POST'])
 def next_priority():
 
-    js = json.dumps(PRIORITY_EVENT)
-    PRIORITY_EVENT = NULL_EVENT
+    if len(PRIORITY_QUEUE) > 0:
+        js = json.dumps(PRIORITY_QUEUE.popleft())
+    else:
+        js = json.dumps(NULL_EVENT)
 
     return Response(js, status=200, mimetype='application/json')
 
