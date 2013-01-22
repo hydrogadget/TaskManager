@@ -27,11 +27,7 @@ app = Flask(__name__)
 app.config.from_object(__name__)
 
 file_handler = RotatingFileHandler('/tmp/hydrogadget.log')
-
-file_handler.setFormatter(Formatter(
-    '%(asctime)s %(levelname)s: %(message)s '
-    '[in %(pathname)s:%(lineno)d]'
-))
+file_handler.setFormatter(Formatter('%(asctime)s %(levelname)s: %(message)s'))
 
 file_handler.setLevel(logging.INFO)
 app.logger.addHandler(file_handler)
@@ -136,6 +132,7 @@ def next_priority():
 
 @app.route('/', methods=['GET','POST'])
 def index():
+    app.logger.info("adding event...")
     return Response(json.dumps(NULL_EVENT), status=200, mimetype='application/json')
 
 if __name__ == '__main__':
