@@ -128,6 +128,7 @@ def next_priority():
     else:
         js = json.dumps(NULL_EVENT)
 
+    CURRENT_EVENT[0] = js
     return Response(js, status=200, mimetype='application/json')
 
 @app.route('/', methods=['GET','POST'])
