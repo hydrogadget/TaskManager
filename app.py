@@ -6,7 +6,7 @@ from collections import deque
 from logging.handlers import RotatingFileHandler
 from logging import Formatter
 
-from flask import Flask, request, session, g, Response, jsonify
+from flask import Flask, request, session, g, Response, jsonify, Response
 
 DATABASE = '/tmp/hydrogadget.db'
 DEBUG = True
@@ -18,10 +18,11 @@ SECRET_KEY = 'the key'
 CHECK_FOR_NEW_EVENTS_INTERVAL = 60
 LOG_FILE_LOCATION="/tmp/hydrogadget.log"
 NULL_EVENT = {"valve":None,"duration":None,"start_time":None,"command":None}
+MOCK_EVENT = {"valve":4,"duration":2,"start_time":2130,"command":None}
 
 EVENT_QUEUE = deque()
 PRIORITY_QUEUE = deque()
-CURRENT_EVENT = [NULL_EVENT,]
+CURRENT_EVENT = [MOCK_EVENT,] if DEBUG else [NULL_EVENT,]
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -97,7 +98,8 @@ def next_event():
 @app.route('/current/event', methods=['GET'])
 def current_event():
 
-    return Response(CURRENT_EVENT, status=200, mimetype='application/json')
+    js = json.dumps(CURRENT_EVENT[0])
+    return Response(js, status=200, mimetype='application/json')
 
 @app.route('/list/priority', methods=['GET'])
 def list_priority():
