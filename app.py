@@ -9,7 +9,7 @@ from logging import Formatter
 from flask import Flask, request, session, g, Response, jsonify, Response
 
 DATABASE = '/tmp/hydrogadget.db'
-DEBUG = True
+DEBUG = False
 
 SECRET_KEY = 'the key'
 # USERNAME = 'admin'
@@ -17,8 +17,8 @@ SECRET_KEY = 'the key'
 
 CHECK_FOR_NEW_EVENTS_INTERVAL = 60
 LOG_FILE_LOCATION="/tmp/hydrogadget.log"
-NULL_EVENT = {"valve":None,"duration":None,"start_time":None,"command":None}
-MOCK_EVENT = {"valve":4,"duration":2,"start_time":2130,"command":None}
+NULL_EVENT = json.dumps({"valve":None,"duration":None,"start_time":None,"command":None})
+MOCK_EVENT = json.dumps({"valve":2,"duration":2,"start_time":2130,"command":None})
 
 EVENT_QUEUE = deque()
 PRIORITY_QUEUE = deque()
@@ -89,17 +89,20 @@ def next_event():
 
     if len(EVENT_QUEUE) > 0:
         js = json.dumps(EVENT_QUEUE.popleft())
+        CURRENT_EVENT[0] = js
     else:
-        js = json.dumps(NULL_EVENT)
+        js = NULL_EVENT
 
-    CURRENT_EVENT[0] = js
     return Response(js, status=200, mimetype='application/json')
 
 @app.route('/current/event', methods=['GET'])
 def current_event():
+    return Response(CURRENT_EVENT[0], status=200, mimetype='application/json')
 
-    js = json.dumps(CURRENT_EVENT[0])
-    return Response(js, status=200, mimetype='application/json')
+@app.route('/set/current/event', methods=['POST'])
+def set_current_event():
+    CURRENT_EVENT[0] = NULL_EVENT 
+    return Response(CURRENT_EVENT[0], status=200, mimetype='application/json')
 
 @app.route('/list/priority', methods=['GET'])
 def list_priority():
@@ -127,10 +130,10 @@ def next_priority():
 
     if len(PRIORITY_QUEUE) > 0:
         js = json.dumps(PRIORITY_QUEUE.popleft())
+        CURRENT_EVENT[0] = js
     else:
-        js = json.dumps(NULL_EVENT)
+        js = NULL_EVENT
 
-    CURRENT_EVENT[0] = js
     return Response(js, status=200, mimetype='application/json')
 
 @app.route('/', methods=['GET','POST'])
