@@ -1,0 +1,8 @@
+APScheduler==2.1.0
+Flask==0.10
+Jinja2==2.7
+MarkupSafe==0.18
+Werkzeug==0.9
+gunicorn==0.17.4
+itsdangerous==0.21
+wsgiref==0.1.2
