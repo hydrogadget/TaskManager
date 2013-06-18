@@ -2,7 +2,7 @@ from flask.views import MethodView
 from flask import request
 import time
 
-import hg
+from hg.utils.stores import get_current_backing_store, get_priority_backing_store
 
 class API(MethodView):
 
@@ -10,11 +10,11 @@ class API(MethodView):
         pass
 
     def post(self):
-        p = hg.get_priority_backing_store()
+        p = get_priority_backing_store()
         p.append(time.time())
         return str("add")
 
     def delete(self):
-        p = hg.get_priority_backing_store()
+        p = get_priority_backing_store()
         j = p.popleft(sleep_wait=False)
         return str(j) + " "
