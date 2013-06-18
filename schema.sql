@@ -7,13 +7,13 @@ create table schedule (
     valve integer not null,
     duration integer not null,
     start_time integer not null,
+    sun integer default 0
     mon integer default 0,
     tue integer default 0,
     wed integer default 0,
     thu integer default 0,
     fri integer default 0,
-    sat integer default 0,
-    sun integer default 0
+    sat integer default 0
 );
 
 create table location (
