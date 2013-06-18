@@ -7,10 +7,12 @@ import logging
 
 logging.basicConfig()
 
+CHECK_INTERVAL = 60
+
 def water_scheduler_timer():
     sched = Scheduler()
 
-    @sched.interval_schedule(seconds=5)
+    @sched.interval_schedule(seconds=CHECK_INTERVAL)
     def check_for_new_events():
 
         # Positions: Sun = 0, Sat = 6, start_time = 7
