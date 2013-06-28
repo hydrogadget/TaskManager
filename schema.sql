@@ -42,3 +42,8 @@ insert into valves values (1,24,"Valve 1");
 insert into valves values (2,23,"Valve 2");
 insert into valves values (3,22,"Valve 3");
 insert into valves values (4,18,"Valve 4");
+
+create table config (
+    key text,
+    value text
+);
