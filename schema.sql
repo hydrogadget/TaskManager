@@ -16,6 +16,11 @@ create table schedule (
     sat integer default 0
 );
 
+insert into schedule values (null,1,10,1010,1,1,1,1,1,1,1);
+insert into schedule values (null,2,10,1010,1,1,1,1,1,1,1);
+insert into schedule values (null,3,10,1010,1,1,1,1,1,1,1);
+insert into schedule values (null,4,10,1010,1,1,1,1,1,1,1);
+
 create table location (
     id integer primary key default 1,
     label text,
@@ -25,7 +30,7 @@ create table location (
     zip text
 );
 
-insert into location values (1, 'Home','5535 Hawley Ct', 'Las Vegas', 'NV', '89118');
+insert into location values (1, 'Home','8085 Chestnut Glen Ave', 'Las Vegas', 'NV', '89131');
 
 create table valves (
     id integer primary key,
