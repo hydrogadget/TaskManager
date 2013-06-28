@@ -34,11 +34,11 @@ insert into location values (1, 'Home','8085 Chestnut Glen Ave', 'Las Vegas', 'N
 
 create table valves (
     id integer primary key,
+    gpio_id integer,
     label text
 );
 
-insert into valves values (1,"Valve 1");
-insert into valves values (2,"Valve 2");
-insert into valves values (3,"Valve 3");
-insert into valves values (4,"Valve 4");
-
+insert into valves values (1,24,"Valve 1");
+insert into valves values (2,23,"Valve 2");
+insert into valves values (3,22,"Valve 3");
+insert into valves values (4,18,"Valve 4");
