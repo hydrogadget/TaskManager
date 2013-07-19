@@ -7,6 +7,8 @@ app.debug = True
 from hg.services import schedules
 from hg.services import location
 from hg.services import valves
+from hg.services import water_group
+from hg.services import network_settings
 
 from hg.cron import water_scheduler_timer
 from hg.utils.stores import purge_backing_stores
@@ -23,6 +25,12 @@ app.add_url_rule('/location/', view_func=l_view, methods=['GET','POST','PUT','DE
 
 v_view = valves.API.as_view('valves_api')
 app.add_url_rule('/valves/', view_func=v_view, methods=['GET','POST','PUT','DELETE'])
+
+w_view = water_group.API.as_view('water_group_api')
+app.add_url_rule('/watergroup/', view_func=c_view, methods=['GET','POST','PUT','DELETE'])
+
+n_view = network_settings.API.as_view('network_settings_api')
+app.add_url_rule('/network/', view_func=c_view, methods=['GET','POST','PUT','DELETE'])
 
 #
 # System Initalization
