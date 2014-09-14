@@ -26,11 +26,13 @@ app.add_url_rule('/location/', view_func=l_view, methods=['GET','POST','PUT','DE
 v_view = valves.API.as_view('valves_api')
 app.add_url_rule('/valves/', view_func=v_view, methods=['GET','POST','PUT','DELETE'])
 
+# In Progress
 w_view = water_group.API.as_view('water_group_api')
-app.add_url_rule('/watergroup/', view_func=c_view, methods=['GET','POST','PUT','DELETE'])
+app.add_url_rule('/watergroup/', view_func=w_view, methods=['GET','POST','PUT','DELETE'])
 
+# In Progress
 n_view = network_settings.API.as_view('network_settings_api')
-app.add_url_rule('/network/', view_func=c_view, methods=['GET','POST','PUT','DELETE'])
+app.add_url_rule('/network/', view_func=n_view, methods=['GET','POST','PUT','DELETE'])
 
 #
 # System Initalization
