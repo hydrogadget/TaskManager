@@ -22,7 +22,7 @@ def waterschedule(address, city, zipcode):
     """
 
     # SNWA URL
-    url = 'http://www.snwa.com/apps/watering_group/get_wg_data.cfml'
+    url = 'http://www.snwa.com/apps/watering_group2/results.cfml'
     values = {'WGstreetaddress': address,
               'WGzip': zipcode,
               'WGcity': city,

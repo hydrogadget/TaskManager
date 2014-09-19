@@ -14,14 +14,14 @@ class API(MethodView):
         location_list.append(request.form['zip'])
         return location_list
 
-    # List 
+    # List
     def get(self):
         db = get_hg_db()
-        cur = db.execute('select label, street, city, state, zip from location')
+        cur = db.execute('select label, street, city, state, zip, id from location')
         row = cur.fetchone()
         db.close()
         location = dict(label=row[0], street=row[1], city=row[2], state=row[3], zip=row[4])
-        return jsonify(location)
+        return jsonify({'location':location})
 
     # Add new
     def post(self):
@@ -30,13 +30,11 @@ class API(MethodView):
         db.commit()
         db.close()
         return jsonify(status="Added New Location")
-    
+
     # Update
     def put(self):
         db = get_hg_db()
-        cur = db.execute('delete from location')
-        cur = db.execute('insert into location values(null, ?, ?, ?, ?, ?)', self._get_fields())
-        # cur = db.execute('update location set label=?, street=?, city=?, state=?, zip=?', self._get_fields())
+        cur = db.execute('update location set label=?, street=?, city=?, state=?, zip=?', self._get_fields())
         db.commit()
         db.close()
         return jsonify(status="Updated Location")
@@ -48,4 +46,3 @@ class API(MethodView):
         db.commit()
         db.close()
         return jsonify(status="Location Deleted")
-
